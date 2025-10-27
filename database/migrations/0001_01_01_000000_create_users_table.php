@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('photo')->nullable();
             $table->string('gender')->nullable();
-            $table->date('brith_date')->nullable();
+            $table->date('birth_date')->nullable();
             $table->string('social_media_provider')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

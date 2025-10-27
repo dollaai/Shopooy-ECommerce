@@ -109,7 +109,7 @@ class AuthenticationController extends Controller
         }
 
         $user = User::where('email', $request->phone_email)
-            ->where('phone', $request->phone_email)
+            ->orWhere('phone', $request->phone_email)
             ->first();
 
         if (!$user) {
@@ -121,7 +121,7 @@ class AuthenticationController extends Controller
             return ResponseFormatter::success([
                 'is_correct' => true,
                 'message' => 'Login berhasil',
-                'token' => $token
+                'token' => $token,
             ]);
         }
         return ResponseFormatter::error(400, 'Password Salah');
