@@ -90,6 +90,8 @@ class User extends Authenticatable
             'store_name' => $this->store_name,
             'product_count' => $this->products()->count(),
             'rating_count' => \App\Models\Products\Review::whereIn('product_id', $productIds)->count(),
+            'join_date' => $this->created_at->diffForHumans(),
+            'send_from' => optional($this->addresses()->where('is_default', true)->first())->getApiResponseAttribute(),
             
         ];
     }
