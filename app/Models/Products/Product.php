@@ -94,7 +94,7 @@ class Product extends Model
             'price_sale' => $this->price_sale ?: null,
             'price_discount_percentage' => $this->price_discount_percentage,
             'sale_count' => $this->sale_count,
-            'image_url' => optional($this->images->first())->image_url,
+            'image' => optional($this->images->first())->image,
             'stock' => $this->stock,
         ];
     }
@@ -109,7 +109,7 @@ class Product extends Model
             'price_sale' => $this->price_sale ?: null,
             'price_discount_percentage' => $this->price_discount_percentage,
             'sale_count' => $this->getSaleCountAttribute(),
-            'image_url' => optional($this->image->first())->image_url,
+            'image' => optional($this->images->first())->image,
             'category' => $this->category?->getApiResponseWithParentAttribute(),
             'stock' => $this->stock,
             'description' => $this->description,
@@ -117,10 +117,44 @@ class Product extends Model
             'length' => $this->length,
             'width' => $this->width,
             'height' => $this->height,
-            'video_url' => $this->video_url,
+            'video' => $this->video,
             'seller' => $this->seller?->getApiResponseAsSellerAttribute(),
             'image' => $this->images->map(fn ($image) => $image->image_url),
-            'variations' => $this->variations->map(fn ($variation) => $variation->getApiResponseAttribute())
+            'variations' => $this->variations->map(fn ($variation) => $variation->getApiResponseAttribute()),
+            'reviews' => [
+                '5' => $this->reviews->where('star_seller', 5)->count(),
+                '4' => $this->reviews->where('star_seller', 4)->count(),
+                '3' => $this->reviews->where('star_seller', 3)->count(),
+                '2' => $this->reviews->where('star_seller', 2)->count(),
+                '1' => $this->reviews->where('star_seller', 1)->count(),
+                'with_attachment' => $this->reviews->whereNotNull('attachments')->count(),
+                'with_description' => $this->reviews->whereNotNull('description')->count(),
+            ],
+            'other_products_from_seller' => $this->seller?->products()->where('id', '!=', $this->id)->random(6)->get()->map(fn ($product) => $product->getApiResponseExceptAttribute())
+        ];
+    }
+
+    public function getApiResponseSellerAttribute()
+    {
+        return [
+            'uuid' => $this->uuid,
+            'slug' => $this->slug,
+            'name' => $this->name,
+            'price' => $this->price,
+            'price_sale' => $this->price_sale ?: null,
+            'price_discount_percentage' => $this->price_discount_percentage,
+            'sale_count' => $this->getSaleCountAttribute(),
+            'image' => optional($this->images->first())->image,
+            'stock' => $this->stock,
+            'category' => $this->category?->getApiResponseWithParentAttribute(),
+            'description' => $this->description,
+            'weight' => $this->weight,
+            'length' => $this->length,
+            'width' => $this->width,
+            'height' => $this->height,
+            'video' => $this->video,
+            'image' => $this->images->map(fn ($image) => $image->image),
+            'variations' => $this->variations->map(fn ($variation) => $variation->getApiResponseAttribute()),
         ];
     }
 }
