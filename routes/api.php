@@ -10,6 +10,9 @@ use App\Http\Controllers\ForgotPasswordController;
 
 Route::get('/slider', [HomeController::class, 'getSlider']);
 Route::get('/category', [HomeController::class, 'getCategory']);
+
+
+Route::post('auth-google', [AuthenticationController::class , 'authGoogle']);
 Route::post('register', [AuthenticationController::class , 'register']);
 Route::post('verify-register', [AuthenticationController::class , 'verifyRegister']);
 Route::post('verify-otp', [AuthenticationController::class , 'verifyOtp']);

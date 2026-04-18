@@ -81,4 +81,16 @@ class User extends Authenticatable
     public function addresses() {
         return $this->hasMany(Address::class);
     }
+
+    public function getApiResponseAsSellerAttribute() {
+        $productIds = $this->products()->pluck('id');
+        return [
+            'photo_url' => $this->photo_url,
+            'username' => $this->username,
+            'store_name' => $this->store_name,
+            'product_count' => $this->products()->count(),
+            'rating_count' => \App\Models\Products\Review::whereIn('product_id', $productIds)->count(),
+            
+        ];
+    }
 }
