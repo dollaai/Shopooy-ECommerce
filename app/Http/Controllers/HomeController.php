@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 class HomeController extends Controller
 {
     //
+    public function getIndex() {
+        return ResponseFormatter::success([
+            'message' => 'Welcome to E-commerce API',
+        ]);
+    }
     public function getSlider() {
         $sliders = Slider::all();
         return ResponseFormatter::success($sliders->pluck('api_response'));
