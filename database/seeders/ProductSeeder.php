@@ -20,7 +20,8 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
 
-        DB::Transaction(function () {
+        
+        DB::transaction(function () {
             for ($productCount = 1; $productCount <= 10; $productCount++) {
                 $payload = [
                     'name' => 'Product ' . $productCount,
@@ -28,6 +29,8 @@ class ProductSeeder extends Seeder
                     'category_id' => Category::whereNotNull('parent_id')->inRandomOrder()->first()->id,
                     'seller_id' => User::inRandomOrder()->first()->id,
                     'price' => rand(10000, 100000),
+                    'price_sale' => rand(1, 100),
+                    
                     'stock' => rand(1, 100),
                     'description' => 'Description for Product ' . $productCount,
                     'weight' => rand(100, 1000),
@@ -46,7 +49,7 @@ class ProductSeeder extends Seeder
                         'dummy/product/8.png',
                         'dummy/product/9.png',
                         'dummy/product/10.png',
-
+    
                     ],
                     'variations' => [
                         [
@@ -103,7 +106,7 @@ class ProductSeeder extends Seeder
                         ],
                     ]
                 ];
-
+    
                 $product = Product::create([
                     'name' => $payload['name'],
                     'slug' => $payload['slug'],
@@ -118,7 +121,7 @@ class ProductSeeder extends Seeder
                     'height' => $payload['height'],
                     'video' => $payload['video'],
                 ]);
-
+    
                 shuffle($payload['images']);
                 foreach ($payload['images'] as $image) {
                     $product->images()->create([
@@ -129,12 +132,13 @@ class ProductSeeder extends Seeder
                 foreach ($payload['variations'] as $variation) {
                     $product->variations()->create($variation);
                 }
-
+    
                 shuffle($payload['reviews']);
                 foreach ($payload['reviews'] as $review) {
                     $product->reviews()->create($review);
                 }
             }
         });
+       
     }
 }

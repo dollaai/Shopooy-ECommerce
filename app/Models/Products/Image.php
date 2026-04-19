@@ -13,7 +13,12 @@ class Image extends Model
 
     public function getImageUrlAttribute()
     {
-        return asset('storage/' . $this->image);
+        if (str_starts_with($this->image, 'storage/')) {
+            return asset('storage/' . $this->image);
+        } else {
+            return asset($this->image);
+        }
+        if (!$this->image) return null;
     }
     public function product()
     {

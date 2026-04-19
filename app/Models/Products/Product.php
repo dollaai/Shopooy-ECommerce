@@ -3,6 +3,10 @@
 namespace App\Models\Products;
 
 use App\Models\Category;
+use App\Models\Products\Image;
+use App\Models\Products\Review;
+use App\Models\Products\Variation;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -52,7 +56,7 @@ class Product extends Model
     }
     public function seller()
     {
-        return $this->belongsTo(\App\Models\User::class, 'seller_id', 'id');
+        return $this->belongsTo(User::class, 'seller_id');
     }
     public function reviews()
     {
@@ -61,7 +65,7 @@ class Product extends Model
 
     public function getRatingAttribute()
     {
-        return round($this->reviews->avg('start_seller', 2));
+        return round($this->reviews->avg('start_seller'),2);
     }
     public function getRatingCountAttribute()
     {
@@ -84,7 +88,7 @@ class Product extends Model
     {
         return 0;
     }
-    public function getApiResponseExceptAttribute()
+    public function getApiResponseExcerptAttribute()
     {
         return [
             'uuid' => $this->uuid,
@@ -92,9 +96,9 @@ class Product extends Model
             'name' => $this->name,
             'price' => $this->price,
             'price_sale' => $this->price_sale ?: null,
-            'price_discount_percentage' => $this->price_discount_percentage,
-            'sale_count' => $this->sale_count,
-            'image' => optional($this->images->first())->image,
+            'price_discount_percentage' => $this->getPriceDiscountPercentAttribute(),
+            'sale_count' => $this->sales_count,
+            'image_url' => $this->images->first()->image_url,
             'stock' => $this->stock,
         ];
     }
@@ -107,9 +111,8 @@ class Product extends Model
             'name' => $this->name,
             'price' => $this->price,
             'price_sale' => $this->price_sale ?: null,
-            'price_discount_percentage' => $this->price_discount_percentage,
-            'sale_count' => $this->getSaleCountAttribute(),
-            'image' => optional($this->images->first())->image,
+            'price_discount_percentage' => $this->getPriceDiscountPercentAttribute(),
+            'sale_count' => $this->getSalesCountAttribute(),
             'category' => $this->category?->getApiResponseWithParentAttribute(),
             'stock' => $this->stock,
             'description' => $this->description,
@@ -119,7 +122,7 @@ class Product extends Model
             'height' => $this->height,
             'video' => $this->video,
             'seller' => $this->seller?->getApiResponseAsSellerAttribute(),
-            'image' => $this->images->map(fn ($image) => $image->image_url),
+            'images' => $this->images->map(fn ($image) => $image->image_url),
             'variations' => $this->variations->map(fn ($variation) => $variation->getApiResponseAttribute()),
             'reviews' => [
                 '5' => $this->reviews->where('star_seller', 5)->count(),
@@ -130,7 +133,9 @@ class Product extends Model
                 'with_attachment' => $this->reviews->whereNotNull('attachments')->count(),
                 'with_description' => $this->reviews->whereNotNull('description')->count(),
             ],
-            'other_products_from_seller' => $this->seller?->products()->where('id', '!=', $this->id)->random(6)->get()->map(fn ($product) => $product->getApiResponseExceptAttribute())
+             'other_product' => $this->seller->products()->where('id', '!=', $this->id)->limit(6)->get()->map(function ($product) {
+                return $product->getApiResponseExcerptAttribute();
+            }),
         ];
     }
 
@@ -142,9 +147,8 @@ class Product extends Model
             'name' => $this->name,
             'price' => $this->price,
             'price_sale' => $this->price_sale ?: null,
-            'price_discount_percentage' => $this->price_discount_percentage,
-            'sale_count' => $this->getSaleCountAttribute(),
-            'image' => optional($this->images->first())->image,
+            'price_discount_percentage' => $this->getPriceDiscountPercentAttribute(),
+            'sale_count' => $this->getSalesCountAttribute(),
             'stock' => $this->stock,
             'category' => $this->category?->getApiResponseWithParentAttribute(),
             'description' => $this->description,
@@ -153,7 +157,7 @@ class Product extends Model
             'width' => $this->width,
             'height' => $this->height,
             'video' => $this->video,
-            'image' => $this->images->map(fn ($image) => $image->image),
+            'images' => $this->images->map(fn ($image) => $image->image_url),
             'variations' => $this->variations->map(fn ($variation) => $variation->getApiResponseAttribute()),
         ];
     }
